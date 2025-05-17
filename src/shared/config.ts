@@ -19,7 +19,7 @@ class ConfigSchema {
   @IsString()
   DATABASE_URL: string;
   @IsString()
-  ACCESS_TOKEN_SECRET!: string;
+  ACCESS_TOKEN_SECRET: string;
   @IsString()
   ACCESS_TOKEN_EXPIRES_IN: string;
   @IsString()
