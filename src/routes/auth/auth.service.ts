@@ -1,13 +1,13 @@
 import {
-  ConflictException,
-  Injectable,
-  UnauthorizedException,
-  UnprocessableEntityException,
+    ConflictException,
+    Injectable,
+    UnauthorizedException,
+    UnprocessableEntityException,
 } from '@nestjs/common';
 import { loginBodyDTO, RegisterBodyDTO } from 'src/routes/auth/auth.dto';
 import {
-  isNotFoundPrismaError,
-  isUniqueConstraintPrismaError,
+    isNotFoundPrismaError,
+    isUniqueConstraintPrismaError,
 } from 'src/shared/helpers';
 import { HashingService } from 'src/shared/services/hashing.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
@@ -62,22 +62,16 @@ export class AuthService {
     return tokens;
   }
 
-  async refreshToken(refreshToken: string) {
+  async logout(refreshToken: string) {
     try {
       // 1 verify refresh token
-      const { userId } =
-        await this.tokenService.verifyRefreshToken(refreshToken);
-      await this.prismaService.refreshToken.findUniqueOrThrow({
-        where: {
-          token: refreshToken,
-        },
-      });
+      await this.tokenService.verifyRefreshToken(refreshToken);
       await this.prismaService.refreshToken.delete({
         where: {
           token: refreshToken,
         },
       });
-      return this.generateTokens({ userId });
+      return { message: 'Logout successfully' };
     } catch (error) {
       if (isNotFoundPrismaError(error)) {
         throw new UnauthorizedException('Refresh token not found');
@@ -85,8 +79,40 @@ export class AuthService {
       throw new UnauthorizedException();
     }
   }
+  async refreshToken(refreshToken: string) {
+    try {
+      // 1 verify refresh token
+      const { userId } =
+        await this.tokenService.verifyRefreshToken(refreshToken);
+      const storedToken = await this.prismaService.refreshToken.findUniqueOrThrow({
+        where: {
+          token: refreshToken,
+        },
+      });
 
-  async generateTokens(payload) {
+      if (new Date() > storedToken.expiresAt) {
+        await this.prismaService.refreshToken.delete({
+          where: { token: refreshToken },
+        });
+        throw new UnauthorizedException('Refresh token expired');
+      }
+
+
+      await this.prismaService.refreshToken.delete({
+        where: { 
+          token: refreshToken,
+        },
+      });
+      return this.generateTokens({ userId });
+    } catch (error) {
+      if (isNotFoundPrismaError(error)) {
+        throw new UnauthorizedException('Refresh token has been revoked');
+      }
+      throw new UnauthorizedException();
+    }
+  }
+
+  async generateTokens(payload: { userId: number }) {
     const [accessToken, refreshToken] = await Promise.all([
       this.tokenService.signAccessToken(payload),
       this.tokenService.signRefreshToken(payload),

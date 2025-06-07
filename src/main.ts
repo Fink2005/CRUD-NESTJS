@@ -17,6 +17,7 @@ async function bootstrap() {
       },
       exceptionFactory: (validationeErrors) => {
         // to customize the error message
+        // console.log(validationeErrors)
         return new UnprocessableEntityException(
           validationeErrors.map((error) => ({
             field: error.property,

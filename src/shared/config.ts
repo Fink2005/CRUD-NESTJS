@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/only-throw-error */
-
 import { plainToInstance } from 'class-transformer';
 import { IsString, validateSync } from 'class-validator';
 import fs from 'fs';
@@ -22,6 +20,8 @@ class ConfigSchema {
   ACCESS_TOKEN_SECRET: string;
   @IsString()
   ACCESS_TOKEN_EXPIRES_IN: string;
+  @IsString()
+  SECRET_API_KEY: string;
   @IsString()
   REFRESH_TOKEN_SECRET: string;
   @IsString()
