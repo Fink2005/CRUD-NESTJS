@@ -1,5 +1,4 @@
 import {
-    ConflictException,
     Injectable,
     UnauthorizedException,
     UnprocessableEntityException,
@@ -7,7 +6,6 @@ import {
 import { loginBodyDTO, RegisterBodyDTO } from 'src/routes/auth/auth.dto';
 import {
     isNotFoundPrismaError,
-    isUniqueConstraintPrismaError,
 } from 'src/shared/helpers';
 import { HashingService } from 'src/shared/services/hashing.service';
 import { PrismaService } from 'src/shared/services/prisma.service';
@@ -21,21 +19,15 @@ export class AuthService {
     private readonly tokenService: TokenService
   ) {}
   async register(body: RegisterBodyDTO) {
-    try {
-      const hashedPassword = await this.hashingService.hash(body.password);
-      const user = await this.prismaService.user.create({
-        data: {
-          email: body.email,
-          password: hashedPassword,
-          name: body.name,
-        },
-      });
-      return user;
-    } catch (error) {
-      if (isUniqueConstraintPrismaError(error)) {
-        throw new ConflictException('Email already exists');
-      }
-    }
+    const hashedPassword = await this.hashingService.hash(body.password);
+    const user = await this.prismaService.user.create({
+      data: {
+        email: body.email,
+        password: hashedPassword,
+        name: body.name,    
+      },
+    });
+    return user;    
   }
   async login(body: loginBodyDTO) {
     const user = await this.prismaService.user.findUnique({
@@ -45,22 +37,22 @@ export class AuthService {
     });
     if (!user) {
       throw new UnauthorizedException('Email not found');
-    }
+    }   
     const isPasswordValid = await this.hashingService.compare(
       body.password,
       user.password
     );
     if (!isPasswordValid) {
-      throw new UnprocessableEntityException([
+      throw new UnprocessableEntityException([      
         {
           field: 'password',
           message: 'Password is incorrect',
         },
       ]);
-    }
+    }   
     const tokens = await this.generateTokens({ userId: user.id });
     return tokens;
-  }
+  } 
 
   async logout(refreshToken: string) {
     try {

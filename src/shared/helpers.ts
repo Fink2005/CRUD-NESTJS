@@ -15,7 +15,7 @@ export const isNotFoundPrismaError = (
   error: any
 ): error is PrismaClientKnownRequestError => {
   return (
-    error instanceof Prisma.PrismaClientKnownRequestError &&
+    error instanceof Prisma.PrismaClientKnownRequestError &&    
     error.code === 'P2025'
   );
 };

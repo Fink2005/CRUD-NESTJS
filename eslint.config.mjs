@@ -47,6 +47,14 @@ export default tseslint.config(
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-explicit-any': 'warn',
       "no-unused-vars": "off",
+    "no-lonely-if": "error",
+      "no-unsafe-member-access": "error",
+      "no-unsafe-return": "error",
+      "no-prototype-builtins": "off",
+      "@typescript-eslint/no-non-null-assertion": "warn",
+      "no-unsafe-optional-chaining": "error",
+      'prefer-const': 'warn',
+
     },
   },
 

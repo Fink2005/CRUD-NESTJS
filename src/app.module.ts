@@ -20,7 +20,6 @@ import { SharedModule } from './shared/shared.module';
     {
         
       provide: APP_INTERCEPTOR,
-        
       useClass: ClassSerializerInterceptor
 
     },
